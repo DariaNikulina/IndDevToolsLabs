@@ -13,7 +13,7 @@ public class Main {
         WordsInTextResults result = WordCountUtils.countWordsInFile(Path.of(filePath));
         int totalWords = result.getWordCount();
         int wordCount = result.getWordFrequencies().getOrDefault(wordToCount, 0);
-        double frequency = (totalWords == 0) ? 0.0 : (wordCount * 100.0 / totalWords);
+        double frequency = WordCountUtils.countFrequency(totalWords, wordCount);
 
         System.out.println("Всего слов: " + totalWords);
         System.out.println("Слово '" + wordToCount + "', всего встречается в тексте: " + wordCount);

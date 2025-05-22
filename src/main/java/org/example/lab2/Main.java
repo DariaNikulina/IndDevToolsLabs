@@ -16,7 +16,7 @@ public class Main {
         WordsInTextResults result = WordCountUtils.parallelCountWordsInFile(dirPath);
         int totalWords = result.getWordCount();
         int wordCount = result.getWordFrequencies().getOrDefault(word, 0);
-        double frequency = totalWords == 0 ? 0.0 : (wordCount * 100.0 / totalWords);
+        double frequency = WordCountUtils.countFrequency(totalWords, wordCount);
 
         System.out.println("Всего слов: " + totalWords);
         System.out.println("Слово '" + word + "', всего встречается в текстах: " + wordCount);

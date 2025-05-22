@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Поиск слов в файлах</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        form {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px 0 0 5px;
+            outline: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #resultsContainer {
+            margin-top: 30px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        th, td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        a.download {
+            color: #2980b9;
+            text-decoration: none;
+        }
+
+        a.download:hover {
+            text-decoration: underline;
+        }
+
+        .loading, .error, .empty {
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<h1>Поиск слова в файлах</h1>
+
+<form id="searchForm">
+    <input type="text" id="queryInput" placeholder="Введите слово" required>
+    <button type="submit">Найти</button>
+</form>
+
+<div id="resultsContainer"></div>
+
+<script>
+    const form = document.getElementById('searchForm');
+    const container = document.getElementById('resultsContainer');
+
+    form.addEventListener('submit', async e => {
+        e.preventDefault();
+        const word = document.getElementById('queryInput').value.trim();
+        if (!word) return;
+        container.innerHTML = '<p class="loading">Загрузка...</p>';
+
+        try {
+            const resp = await fetch('search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ word })
+            });
+
+            if (!resp.ok) throw new Error(`Ошибка ${resp.status}`);
+
+            const results = await resp.json();
+
+            if (!results.length) {
+                container.innerHTML = '<p class="empty">Ничего не найдено.</p>';
+                return;
+            }
+
+            const tableRows = results.map(ws => `
+                <tr>
+                    <td><a class="download" href="search?filename=${encodeURIComponent(ws.filename)}">${ws.filename}</a></td>
+                    <td>${ws.word}</td>
+                    <td>${ws.count}</td>
+                    <td>${ws.percentage.toFixed(2)}%</td>
+                </tr>`).join('');
+
+            container.innerHTML = `
+                <h2>Результаты для «${word}»:</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Файл</th>
+                            <th>Слово</th>
+                            <th>Вхождений</th>
+                            <th>Процент</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>`;
+
+        } catch (err) {
+            container.innerHTML = `<p class="error">Ошибка: ${err.message}</p>`;
+        }
+    });
+</script>
+</body>
+</html>

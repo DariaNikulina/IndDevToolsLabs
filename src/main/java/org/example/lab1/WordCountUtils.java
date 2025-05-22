@@ -80,4 +80,8 @@ public class WordCountUtils {
 
         return new WordsInTextResults(Collections.emptyMap(), 0);
     }
+
+    public static double countFrequency(int total, int wordCount) {
+        return total > 0 ? (double) wordCount / total * 100 : 0.0;
+    }
 }
